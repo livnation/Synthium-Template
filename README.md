@@ -1,7 +1,8 @@
 # Synthium-Template
 
 Why Synthium Template?
-Optimized for Performance
+
+Optimized for Performance:
 
 Synthium is engineered to minimize resource consumption while maintaining peak performance. It’s crafted with the goal of running smoothly on any system, even during extended play sessions. The use of object pooling guarantees there are no memory leaks, ensuring optimal frame rates throughout.
 Sleek and Clean UI
