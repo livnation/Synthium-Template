@@ -12,10 +12,6 @@ namespace Synthium.Backend.ConsoleLibrary
     {
         [DllImport("kernel32.dll", SetLastError = true)]
         public static extern IntPtr AllocConsole();
-        [DllImport("kernel32.dll", CharSet = CharSet.Unicode)]
-        public static extern bool Write(IntPtr hConsoleOutput, string lpBuffer, uint nNumberOfCharsToWrite, out uint lpNumberOfCharsWritten, IntPtr lpReserved);
-        [DllImport("kernel32.dll", SetLastError = true)]
-        public static extern bool FreeConsole();
 
         void Start()
         {

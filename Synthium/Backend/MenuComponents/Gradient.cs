@@ -17,12 +17,12 @@ namespace Synthium.Backend.MenuComponents
         private float time;
         private int frameCount = 0;
         private Color[] pixels;
-        public static void AddGradientComponent(GameObject obj, Color start, Color end, float flowspeed = 0.5f)
+        public static void AddGradientComponent(GameObject obj, Color start, Color end, float speed = 0.5f)
         {
             var gradient = obj.AddComponent<Gradient>();
             gradient.starting = start;
             gradient.ending = end;
-            gradient.speed = flowspeed;
+            gradient.speed = speed;
             gradient.Startup();
         }
         private void Startup()

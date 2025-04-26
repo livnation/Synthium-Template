@@ -24,7 +24,7 @@ namespace Synthium.WristMenu
         {
             try
             {
-                if (menu != null) return;
+                if (menu != null && ControllerInputPoller.instance.leftControllerPrimaryButton) return;
                 Draw();
             }
             catch (Exception e)
@@ -87,9 +87,6 @@ namespace Synthium.WristMenu
             component.sizeDelta = new Vector2(0.6f, 0.03f);
             component.position = new Vector3(0.06f, 0f, 0.154f);
             component.rotation = Quaternion.Euler(new Vector3(180f, 90f, 90f));
-            Color start = GetHex("#FF9AE3");
-            Color end = GetHex("#A1C4FD");
-            Synthium.Backend.MenuComponents.Gradient.AddGradientComponent(menu, start, end, 0.5f);
         }
         public static void CreateButtons(BaseMod mod)
         {

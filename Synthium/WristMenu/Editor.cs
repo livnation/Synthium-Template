@@ -12,43 +12,53 @@ namespace Synthium.WristMenu
 
         static Color32 menuBackGroundColor = new Color32(12, 52, 94, 255); // navy blue
 
-
-
-        private static void ThemeSwitch()
+        static void ChangeTheme(Color32 btnDisabled, Color32 btnEnabled, Color32 background)
         {
-            if (themeRoller < amountOfThemes)
+            buttonColorDisabled = btnDisabled;
+            buttonTextColorEnabled = btnEnabled;
+            menuBackGroundColor = background;
+        }
+
+        public static void ThemeSwitch()
+        {
+            /*
+                shortened themeroller increment method, changed to switch statement
+                also made ThemeSwitch public, and added a changetheme function so its easier ig
+            */
+            themeRoller = (themeRoller + 1) % amountOfThemes;
+            switch (themeRoller)
             {
-                themeRoller++;
-            }
-            else
-            {
-                themeRoller = 0;
-            }
-            if (themeRoller == 0) // default theme
-            {
-                buttonColorDisabled = new Color32(28, 29, 33, 255); // dark grey
-                buttonTextColorEnabled = new Color32(60, 195, 80, 255); // light green
-                menuBackGroundColor = new Color32(12, 52, 94, 255); // navy blue
-            }
-            if (themeRoller == 1)
-            {
-                // il do later the actual themes and colors and stuff
-            }
-            if (themeRoller == 2)
-            {
-                // il do later the actual themes and colors and stuff
-            }
-            if (themeRoller == 3) 
-            {
-                // il do later the actual themes and colors and stuff
-            }
-            if (themeRoller == 4)
-            {
-                // il do later the actual themes and colors and stuff
-            }
-            if (themeRoller == 5)
-            {
-                // il do later the actual themes and colors and stuff
+                case 0:
+                    // main theme, grey navy wtv
+                    ChangeTheme(
+                        new Color32(28, 29, 33, 255),
+                        new Color32(60, 195, 80, 255),
+                        new Color32(12, 52, 94, 255)
+                    );
+                    break;
+                case 1:
+                    // purple theme
+                    ChangeTheme(
+                        new Color32(47, 0, 204, 1),
+                        new Color32(30, 0, 133, 1),
+                         new Color32(129, 0, 238,1)
+                    );
+                    break;
+                case 2:
+                    // blue black gradient
+                    Backend.MenuComponents.Gradient.AddGradientComponent(PhysicalMenu.menu, Color.blue, Color.black);
+                    break;
+                case 3:
+                    // nice bubblegum gradient
+                    Color start = PhysicalMenu.GetHex("#FF9AE3");
+                    Color end = PhysicalMenu.GetHex("#A1C4FD");
+                    Synthium.Backend.MenuComponents.Gradient.AddGradientComponent(PhysicalMenu.menu, start, end, 0.5f);
+                    break;
+                // add rest ig
+                case 4:
+                    break;
+                case 5:
+                    break;
             }
         }
     }
