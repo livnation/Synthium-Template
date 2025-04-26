@@ -12,7 +12,7 @@ namespace Synthium.Backend.Patches
     }
 
     [HarmonyPatch(typeof(VRRigJobManager), "DeregisterVRRig")]
-    public static class RigPatch2
+    public class RigPatch2
     {
         public static bool Prefix(VRRigJobManager __instance, VRRig rig)
         {
