@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Synthium.Features
+namespace Synthium.WristMenu
 {
     internal class Settings
     {
