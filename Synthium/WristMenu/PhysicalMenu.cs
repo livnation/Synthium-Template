@@ -24,7 +24,7 @@ namespace Synthium.WristMenu
         {
             try
             {
-                if (menu != null && ControllerInputPoller.instance.leftControllerPrimaryButton) return;
+                if (menu == null || !ControllerInputPoller.instance.leftControllerPrimaryButton) return;
                 Draw();
             }
             catch (Exception e)
