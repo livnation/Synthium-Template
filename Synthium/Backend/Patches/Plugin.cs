@@ -19,7 +19,7 @@ namespace Synthium.Backend.Patches
     {
         private void Start()
         {
-            new Harmony("cannabischeat").PatchAll(Assembly.GetExecutingAssembly());
+            new Harmony("synthiumproductions").PatchAll(Assembly.GetExecutingAssembly());
             GameObject go = new GameObject("SynthiumObj");
             go.AddComponent<PhysicalMenu>();
             DontDestroyOnLoad(go);
