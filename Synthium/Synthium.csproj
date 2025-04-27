@@ -50,6 +50,7 @@
     <Compile Include="Backend\Patches\StopSpying.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="WristMenu\Editor.cs" />
+    <Compile Include="WristMenu\Modules.cs" />
     <Compile Include="WristMenu\PhysicalMenu.cs" />
   </ItemGroup>
   <ItemGroup>
