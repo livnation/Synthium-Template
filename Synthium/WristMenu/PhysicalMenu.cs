@@ -10,6 +10,7 @@ using Synthium.Backend.ConsoleLibrary;
 using Synthium.Backend.MenuComponents;
 using UnityEngine;
 using UnityEngine.UI;
+using Button = Synthium.Backend.MenuComponents.Button;
 using static Fusion.Sockets.NetBitBuffer;
 
 namespace Synthium.WristMenu
@@ -20,16 +21,40 @@ namespace Synthium.WristMenu
         public static GameObject menu;
         public static GameObject baseMenu;
         public static GameObject canvasObj;
+        private static int pageIndex;
         public static void Prefix()
         {
             try
             {
-                if (menu != null && ControllerInputPoller.instance.leftControllerPrimaryButton) return;
-                Draw();
+                //if (ControllerInputPoller.instance.leftControllerPrimaryButton)
+                //{
+                if (!menu) Draw();
+                //}
+                //else
+                //{
+                //DestroyMenu(false);
+                //}
             }
             catch (Exception e)
             {
-                OverrideConsole.EasyWrite("Error: " + e.Message);
+                OverrideConsole.EasyWrite($"Error: {e.Message}");
+            }
+            try
+            {
+                foreach (Button[] buttons in ButtonList.Buttons)
+                {
+                    foreach (Button button in buttons)
+                    {
+                        if (button.enabled)
+                        {
+                            button.enableMethod.Invoke();
+                        }
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                OverrideConsole.EasyWrite($"Error: {e.Message}");
             }
         }
 
@@ -42,55 +67,100 @@ namespace Synthium.WristMenu
         {
             if (menu == null) return;
             var hand = GTPlayer.Instance.leftControllerTransform;
-            baseMenu.transform.position = hand.position + (hand.forward * 0.26f) + (hand.right * 0.02f);
-            baseMenu.transform.rotation = hand.rotation;
+            baseMenu.transform.SetPositionAndRotation(hand.position + hand.right * 0.07f, hand.rotation);
+        }
+
+        public static void Nigger()
+        {
+            UnityEngine.Object.FindObjectOfType<CrittersFood>().SpawnData(999, 999, 25f);
         }
 
         public static void Draw()
         {
             baseMenu = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            UnityEngine.Object.Destroy(baseMenu.GetComponent<Rigidbody>());
-            UnityEngine.Object.Destroy(baseMenu.GetComponent<BoxCollider>());
-            UnityEngine.Object.Destroy(baseMenu.GetComponent<Renderer>());
-            baseMenu.transform.localScale = new Vector3(0.1f, 0.3f, 0.3825f);
             menu = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            UnityEngine.Object.Destroy(menu.GetComponent<Rigidbody>());
-            UnityEngine.Object.Destroy(menu.GetComponent<BoxCollider>());
-            menu.transform.SetParent(baseMenu.transform);
-            menu.transform.rotation = Quaternion.identity;
-            menu.transform.localScale = new Vector3(0.1f, 1.1f, 1f);
-            menu.transform.position = Vector3.zero;
-            canvasObj = new GameObject();
-            canvasObj.transform.parent = menu.transform;
-            Canvas canvas = canvasObj.AddComponent<Canvas>();
-            CanvasScaler canvasScaler = canvasObj.AddComponent<CanvasScaler>();
-            canvasObj.AddComponent<GraphicRaycaster>();
-            canvas.renderMode = RenderMode.WorldSpace;
-            canvasScaler.dynamicPixelsPerUnit = 2000f;
-            // just took text from old template, someone fix the positioning.
-            Text text = new GameObject
+            foreach (var obj in new[] { baseMenu, menu })
             {
-                transform =
-                    {
-                        parent = canvasObj.transform
-                    }
-            }.AddComponent<Text>();
-            text.font = (Resources.GetBuiltinResource(typeof(Font), "Arial.ttf") as Font);
+                UnityEngine.Object.Destroy(obj.GetComponent<Rigidbody>());
+                UnityEngine.Object.Destroy(obj.GetComponent<BoxCollider>());
+                if (obj == baseMenu) UnityEngine.Object.Destroy(obj.GetComponent<Renderer>());
+            }
+            baseMenu.transform.localScale = new Vector3(0.1f, 0.3f, 0.3825f);
+            menu.transform.SetParent(baseMenu.transform);
+            menu.transform.SetPositionAndRotation(Vector3.zero, Quaternion.identity);
+            menu.transform.localScale = new Vector3(0.1f, 1.1f, 1f);
+
+            canvasObj = new GameObject { transform = { parent = menu.transform } };
+            var canvas = canvasObj.AddComponent<Canvas>();
+            canvas.renderMode = RenderMode.WorldSpace;
+            canvasObj.AddComponent<CanvasScaler>().dynamicPixelsPerUnit = 2000f;
+            canvasObj.AddComponent<GraphicRaycaster>();
+
+            var text = new GameObject { transform = { parent = canvasObj.transform } }.AddComponent<Text>();
+            text.font = Resources.GetBuiltinResource<Font>("Arial.ttf");
             text.text = "Synthium";
             text.fontSize = 1;
             text.color = Color.white;
             text.supportRichText = true;
             text.resizeTextForBestFit = true;
             text.resizeTextMinSize = 0;
-            RectTransform component = text.GetComponent<RectTransform>();
-            component.localPosition = Vector3.zero;
-            component.sizeDelta = new Vector2(0.6f, 0.03f);
-            component.position = new Vector3(0.06f, 0f, 0.154f);
-            component.rotation = Quaternion.Euler(new Vector3(180f, 90f, 90f));
+
+            var rect = text.GetComponent<RectTransform>();
+            rect.localPosition = Vector3.zero;
+            rect.sizeDelta = new Vector2(0.6f, 0.03f);
+            rect.SetPositionAndRotation(new Vector3(0.06f, 0f, 0.165f), Quaternion.Euler(180f, 90f, 90f));
+
+            menu.GetComponent<MeshRenderer>().material.color = new Color32(12, 52, 94, 255);
         }
-        public static void CreateButtons(BaseMod mod)
+
+        public static void CreateButtons()
         {
-           
+            GameObject btn = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            UnityEngine.Object.Destroy(btn.GetComponent<Rigidbody>());
+            btn.GetComponent<BoxCollider>().isTrigger = true;
+        }
+        public static Button GetButton(string buttonText)
+        {
+            return ButtonList.Buttons.SelectMany(buttons => buttons).FirstOrDefault(button => button.buttonText == buttonText);
+        }
+
+        public static void DestroyMenu(bool redraw)
+        {
+            if (menu || baseMenu)
+            {
+                UnityEngine.Object.Destroy(menu);
+                UnityEngine.Object.Destroy(baseMenu);
+                menu = baseMenu = null;
+            }
+            if (redraw)
+            {
+                Draw();
+            }
+        }
+        public static void ToggleButton(string btnText)
+        {
+            int pageLength = ButtonList.Buttons.Length;
+            if (btnText == "next")
+            {
+                pageIndex = (pageIndex + 1) % pageLength;
+                return;
+            }
+            if (btnText == "prev")
+            {
+                pageIndex = (pageIndex - 1 + pageLength) % pageLength;
+                return;
+            }
+            var button = GetButton(btnText);
+            if (button == null) return;
+            if (button.toggle)
+            {
+                button.enabled = !button.enabled;
+                (button.enabled ? button.enableMethod : button.disable)?.Invoke();
+            }
+            else
+            {
+                button.method.Invoke();
+            }
         }
     }
 }
