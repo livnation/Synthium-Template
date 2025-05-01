@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using BepInEx;
+using ExitGames.Client.Photon.StructWrapping;
 using GorillaLocomotion;
 using HarmonyLib;
 using Synthium.Backend.ConsoleLibrary;
@@ -22,23 +23,30 @@ namespace Synthium.WristMenu
         public static GameObject baseMenu;
         public static GameObject canvasObj;
         private static int pageIndex;
+        public static int categoryIndex;
+        public static GameObject clicker;
+        public static SphereCollider clickerCollider;
+
         public static void Prefix()
         {
             try
             {
-                //if (ControllerInputPoller.instance.leftControllerPrimaryButton)
-                //{
-                if (!menu) Draw();
-                //}
-                //else
-                //{
-                //DestroyMenu(false);
-                //}
+                if (menu == null /*&& ControllerInputPoller.instance.leftControllerPrimaryButton*/)
+                {
+                    CreateClicker();
+                    Debug.Log("Drawing menu!");
+                    Draw();
+                }
+/*else if (menu != null && !ControllerInputPoller.instance.leftControllerPrimaryButton)
+{
+    DestroyMenu(false);
+}*/
             }
             catch (Exception e)
             {
                 OverrideConsole.EasyWrite($"Error: {e.Message}");
             }
+
             try
             {
                 foreach (Button[] buttons in ButtonList.Buttons)
@@ -67,13 +75,24 @@ namespace Synthium.WristMenu
         {
             if (menu == null) return;
             var hand = GTPlayer.Instance.leftControllerTransform;
-            baseMenu.transform.SetPositionAndRotation(hand.position + hand.right * 0.07f, hand.rotation);
+            baseMenu.transform.SetPositionAndRotation(hand.position + hand.right * 0.07f + hand.up * 0.03f,
+                hand.rotation);
+            clicker.transform.localPosition = new Vector3(0f, -0.1f, 0f);
         }
 
-        public static void Nigger()
+        public static void CreateClicker()
         {
-            UnityEngine.Object.FindObjectOfType<CrittersFood>().SpawnData(999, 999, 25f);
+            clicker = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            clicker.name = "SynthiumClicker";
+            clicker.transform.parent = GorillaTagger.Instance.rightHandTransform;
+            clicker.transform.localPosition = new Vector3(0f, -0.1f, 0f);
+            clicker.transform.localScale = new Vector3(0.1f, 0.1f, 0.1f);
+            clicker.GetComponent<Renderer>().enabled = true;
+            clicker.GetComponent<MeshRenderer>().material.color = Color.white;
+            clickerCollider = clicker.AddComponent<SphereCollider>();
+            Debug.Log("Clicker created successfully.");
         }
+
 
         public static void Draw()
         {
@@ -85,17 +104,17 @@ namespace Synthium.WristMenu
                 UnityEngine.Object.Destroy(obj.GetComponent<BoxCollider>());
                 if (obj == baseMenu) UnityEngine.Object.Destroy(obj.GetComponent<Renderer>());
             }
+
             baseMenu.transform.localScale = new Vector3(0.1f, 0.3f, 0.3825f);
             menu.transform.SetParent(baseMenu.transform);
             menu.transform.SetPositionAndRotation(Vector3.zero, Quaternion.identity);
             menu.transform.localScale = new Vector3(0.1f, 1.1f, 1f);
-
             canvasObj = new GameObject { transform = { parent = menu.transform } };
             var canvas = canvasObj.AddComponent<Canvas>();
+            canvas.name = "SynthiumText";
             canvas.renderMode = RenderMode.WorldSpace;
             canvasObj.AddComponent<CanvasScaler>().dynamicPixelsPerUnit = 2000f;
             canvasObj.AddComponent<GraphicRaycaster>();
-
             var text = new GameObject { transform = { parent = canvasObj.transform } }.AddComponent<Text>();
             text.font = Resources.GetBuiltinResource<Font>("Arial.ttf");
             text.text = "Synthium";
@@ -104,24 +123,66 @@ namespace Synthium.WristMenu
             text.supportRichText = true;
             text.resizeTextForBestFit = true;
             text.resizeTextMinSize = 0;
-
             var rect = text.GetComponent<RectTransform>();
             rect.localPosition = Vector3.zero;
             rect.sizeDelta = new Vector2(0.6f, 0.03f);
             rect.SetPositionAndRotation(new Vector3(0.06f, 0f, 0.165f), Quaternion.Euler(180f, 90f, 90f));
-
-            menu.GetComponent<MeshRenderer>().material.color = new Color32(12, 52, 94, 255);
+            Color start = PhysicalMenu.GetHex("#FF9AE3");
+            Color end = PhysicalMenu.GetHex("#A1C4FD");
+            Synthium.Backend.MenuComponents.Gradient.AddGradientComponent(menu, start, end, 0.5f);
+            Button[] activeButtons = ButtonList.Buttons[categoryIndex].Skip(pageIndex * 7).Take(8).ToArray();
+            for (int i = 0; i < activeButtons.Length; i++)
+            {
+                CreateButtons(activeButtons[i], i * 0.1f);
+            }
         }
 
-        public static void CreateButtons()
+        // took this off of iiDk template mainly, so credits to iiDk.
+        public static void CreateButtons(Button btn, float offset)
         {
-            GameObject btn = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            UnityEngine.Object.Destroy(btn.GetComponent<Rigidbody>());
-            btn.GetComponent<BoxCollider>().isTrigger = true;
+            GameObject button = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            UnityEngine.Object.Destroy(button.GetComponent<Rigidbody>());
+            UnityEngine.Object.Destroy(button.GetComponent<BoxCollider>());
+            button.transform.parent = baseMenu.transform;
+            button.transform.rotation = Quaternion.identity;
+            button.transform.localScale = new Vector3(0.09f, 0.9f, 0.08f);
+            button.transform.localPosition = new Vector3(0.56f, 0f, 0.28f - offset);
+            button.GetComponent<BoxCollider>().isTrigger = true;
+            button.AddComponent<ButtonCollider>().text = btn.buttonText;
+            button.GetComponent<MeshRenderer>().material.color = Color.black;
+            Text text = new GameObject
+            {
+                transform =
+                {
+                    parent = canvasObj.transform
+                }
+            }.AddComponent<Text>();
+            text.font = Resources.GetBuiltinResource<Font>("Arial.ttf");
+            text.text = btn.buttonText;
+            if (btn.enabled)
+            {
+                text.color = Color.green;
+            }
+            else
+            {
+                text.color = Color.white;
+            }
+
+            text.alignment = TextAnchor.MiddleCenter;
+            text.fontStyle = FontStyle.Italic;
+            text.resizeTextForBestFit = true;
+            text.resizeTextMinSize = 0;
+            RectTransform component = text.GetComponent<RectTransform>();
+            component.localPosition = Vector3.zero;
+            component.sizeDelta = new Vector2(.2f, .03f);
+            component.localPosition = new Vector3(.064f, 0, .111f - offset / 2.6f);
+            component.rotation = Quaternion.Euler(new Vector3(180f, 90f, 90f));
         }
+
         public static Button GetButton(string buttonText)
         {
-            return ButtonList.Buttons.SelectMany(buttons => buttons).FirstOrDefault(button => button.buttonText == buttonText);
+            return ButtonList.Buttons.SelectMany(buttons => buttons)
+                .FirstOrDefault(button => button.buttonText == buttonText);
         }
 
         public static void DestroyMenu(bool redraw)
@@ -132,11 +193,13 @@ namespace Synthium.WristMenu
                 UnityEngine.Object.Destroy(baseMenu);
                 menu = baseMenu = null;
             }
+
             if (redraw)
             {
                 Draw();
             }
         }
+
         public static void ToggleButton(string btnText)
         {
             int pageLength = ButtonList.Buttons.Length;
@@ -145,11 +208,13 @@ namespace Synthium.WristMenu
                 pageIndex = (pageIndex + 1) % pageLength;
                 return;
             }
+
             if (btnText == "prev")
             {
                 pageIndex = (pageIndex - 1 + pageLength) % pageLength;
                 return;
             }
+
             var button = GetButton(btnText);
             if (button == null) return;
             if (button.toggle)
@@ -161,6 +226,8 @@ namespace Synthium.WristMenu
             {
                 button.method.Invoke();
             }
+
+            DestroyMenu(true);
         }
     }
 }

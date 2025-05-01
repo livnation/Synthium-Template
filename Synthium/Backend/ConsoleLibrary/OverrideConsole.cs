@@ -7,6 +7,7 @@ using System.IO;
 
 namespace Synthium.Backend.ConsoleLibrary
 {
+    // will not work unless bepinex console is disabled
     [BepInPlugin("synthium.debugger", "Synthium Debugger", "0.0.1")]
     internal class OverrideConsole : BaseUnityPlugin
     {

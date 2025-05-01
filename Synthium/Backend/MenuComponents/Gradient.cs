@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace Synthium.Backend.MenuComponents
 {
@@ -27,16 +22,17 @@ namespace Synthium.Backend.MenuComponents
         }
         private void Startup()
         {
-            Renderer renderer = GetComponent<Renderer>();
+            MeshRenderer renderer = GetComponent<MeshRenderer>();
             if (renderer == null) return;
             tex2d = new Texture2D(128, 128, TextureFormat.RGBA32, false);
+            // do not change to ubershader or gradient will not work
             mat = new Material(Shader.Find("Unlit/Texture"));
-            mat.mainTexture = tex2d;
             renderer.material = mat;
+            mat.mainTexture = tex2d;
             pixels = new Color[128 * 128];
-            UpdateText();
+            UpdateTexture();
         }
-        private void UpdateText()
+        private void UpdateTexture()
         {
             for (int y = 0; y < 128; y++)
             {
@@ -45,7 +41,7 @@ namespace Synthium.Backend.MenuComponents
                     float u = (float)x / (128 - 1);
                     float v = (float)y / (128 - 1);
                     float t = Mathf.PingPong((u + v) / 2 + time, 1f);
-                    t = SmoothStep(t);
+                    t = Interpolate(t);
                     Color gradientColor = Color.Lerp(starting, ending, t);
                     pixels[y * 128 + x] = gradientColor;
                 }
@@ -55,7 +51,7 @@ namespace Synthium.Backend.MenuComponents
             frameCount++;
         }
 
-        private float SmoothStep(float t)
+        private float Interpolate(float t)
         {
             return t * t * (3f - 2f * t);
         }
@@ -63,7 +59,7 @@ namespace Synthium.Backend.MenuComponents
         private void Update()
         {
             time += Time.deltaTime * speed;
-            UpdateText();
+            UpdateTexture();
         }
     }
 }

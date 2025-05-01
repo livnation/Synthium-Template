@@ -7,6 +7,7 @@ using HarmonyLib;
 
 namespace Synthium.Backend.Patches
 {
+    // blocks finger input without breaking any mods 😁
     [HarmonyPatch(typeof(VRMap), "MapMyFinger")]
     internal class FingerPatch1
     {

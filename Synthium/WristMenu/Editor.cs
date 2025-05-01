@@ -4,13 +4,13 @@ namespace Synthium.WristMenu
 {
     internal class Settings
     {
-        static int themeRoller;
+        public static int themeRoller;
         static int amountOfThemes = 5; // change to your liking
 
         static Color32 buttonColorDisabled = new Color32(28, 29, 33, 255); // dark grey
         static Color32 buttonTextColorEnabled = new Color32(60, 195, 80, 255); // light green
 
-        static Color32 menuBackGroundColor = new Color32(12, 52, 94, 255); // navy blue
+        public static Color32 menuBackGroundColor = new Color32(12, 52, 94, 255); // navy blue
 
         static void ChangeTheme(Color32 btnDisabled, Color32 btnEnabled, Color32 background)
         {
@@ -54,7 +54,7 @@ namespace Synthium.WristMenu
                     Color end = PhysicalMenu.GetHex("#A1C4FD");
                     Synthium.Backend.MenuComponents.Gradient.AddGradientComponent(PhysicalMenu.menu, start, end, 0.5f);
                     break;
-                // add rest ig
+                // add rest
                 case 4:
                     break;
                 case 5:
