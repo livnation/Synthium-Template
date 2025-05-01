@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -31,16 +31,8 @@ namespace Synthium.WristMenu
         {
             try
             {
-                if (menu == null /*&& ControllerInputPoller.instance.leftControllerPrimaryButton*/)
-                {
-                    CreateClicker();
-                    Debug.Log("Drawing menu!");
-                    Draw();
-                }
-/*else if (menu != null && !ControllerInputPoller.instance.leftControllerPrimaryButton)
-{
-    DestroyMenu(false);
-}*/
+                if (menu == null || !ControllerInputPoller.instance.leftControllerPrimaryButton) return;
+                Draw();
             }
             catch (Exception e)
             {
