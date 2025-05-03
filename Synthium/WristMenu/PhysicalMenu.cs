@@ -1,60 +1,56 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using BepInEx;
-using ExitGames.Client.Photon.StructWrapping;
 using GorillaLocomotion;
 using HarmonyLib;
+using Oculus.Interaction.Input;
+using Photon.Pun;
+using Photon.Realtime;
 using Synthium.Backend.ConsoleLibrary;
 using Synthium.Backend.MenuComponents;
 using UnityEngine;
 using UnityEngine.UI;
 using Button = Synthium.Backend.MenuComponents.Button;
-using static Fusion.Sockets.NetBitBuffer;
+using Object = UnityEngine.Object;
 
 namespace Synthium.WristMenu
 {
     [HarmonyPatch(typeof(GTPlayer), "LateUpdate")]
     internal class PhysicalMenu : MonoBehaviour
     {
-        public static GameObject menu;
-        public static GameObject baseMenu;
-        public static GameObject canvasObj;
+        public static GameObject menu, baseMenu, canvasObj, clicker;
         private static int pageIndex;
         public static int categoryIndex;
-        public static GameObject clicker;
         public static SphereCollider clickerCollider;
+
 
         public static void Prefix()
         {
             try
             {
-                if (menu == null || !ControllerInputPoller.instance.leftControllerPrimaryButton) return;
-                Draw();
-            }
-            catch (Exception e)
-            {
-                OverrideConsole.EasyWrite($"Error: {e.Message}");
-            }
-
-            try
-            {
-                foreach (Button[] buttons in ButtonList.Buttons)
+                if (menu == null && ControllerInputPoller.instance.leftControllerPrimaryButton)
                 {
-                    foreach (Button button in buttons)
+                    Draw();
+                }
+                else if (menu != null && !ControllerInputPoller.instance.leftControllerPrimaryButton)
+                {
+                    DestroyMenu(false);
+                }
+
+                foreach (Button[] btns in ButtonList.Buttons)
+                {
+                    foreach (Button btn in btns)
                     {
-                        if (button.enabled)
+                        if (btn.enabled && btn.enableMethod != null)
                         {
-                            button.enableMethod.Invoke();
+                            btn.enableMethod.Invoke();
                         }
                     }
                 }
             }
             catch (Exception e)
             {
-                OverrideConsole.EasyWrite($"Error: {e.Message}");
+                Debug.Log($"error in prefix: {e.ToString()} stack trace: {e.StackTrace} source: {e.Source}");
             }
         }
 
@@ -78,13 +74,14 @@ namespace Synthium.WristMenu
             clicker.name = "SynthiumClicker";
             clicker.transform.parent = GorillaTagger.Instance.rightHandTransform;
             clicker.transform.localPosition = new Vector3(0f, -0.1f, 0f);
-            clicker.transform.localScale = new Vector3(0.1f, 0.1f, 0.1f);
+            clicker.transform.localScale = new Vector3(0.01f, 0.01f, 0.01f);
             clicker.GetComponent<Renderer>().enabled = true;
             clicker.GetComponent<MeshRenderer>().material.color = Color.white;
+            UnityEngine.Object.Destroy(clicker.GetComponent<Collider>());
+            UnityEngine.Object.Destroy(clicker.GetComponent<Rigidbody>());
             clickerCollider = clicker.AddComponent<SphereCollider>();
-            Debug.Log("Clicker created successfully.");
+            clickerCollider.isTrigger = true;
         }
-
 
         public static void Draw()
         {
@@ -93,122 +90,231 @@ namespace Synthium.WristMenu
             foreach (var obj in new[] { baseMenu, menu })
             {
                 UnityEngine.Object.Destroy(obj.GetComponent<Rigidbody>());
-                UnityEngine.Object.Destroy(obj.GetComponent<BoxCollider>());
-                if (obj == baseMenu) UnityEngine.Object.Destroy(obj.GetComponent<Renderer>());
+                UnityEngine.Object.Destroy(obj.GetComponent<Collider>());
             }
+
+            UnityEngine.Object.Destroy(baseMenu.GetComponent<Renderer>());
 
             baseMenu.transform.localScale = new Vector3(0.1f, 0.3f, 0.3825f);
             menu.transform.SetParent(baseMenu.transform);
-            menu.transform.SetPositionAndRotation(Vector3.zero, Quaternion.identity);
-            menu.transform.localScale = new Vector3(0.1f, 1.1f, 1f);
-            canvasObj = new GameObject { transform = { parent = menu.transform } };
+            menu.transform.localPosition = Vector3.zero;
+            menu.transform.localRotation = Quaternion.identity;
+            menu.transform.localScale = new Vector3(0.1f, 1.1f, 0.8f);
+            canvasObj = new GameObject();
+            canvasObj.transform.parent = menu.transform;
             var canvas = canvasObj.AddComponent<Canvas>();
-            canvas.name = "SynthiumText";
             canvas.renderMode = RenderMode.WorldSpace;
             canvasObj.AddComponent<CanvasScaler>().dynamicPixelsPerUnit = 2000f;
             canvasObj.AddComponent<GraphicRaycaster>();
-            var text = new GameObject { transform = { parent = canvasObj.transform } }.AddComponent<Text>();
+
+            var text = new GameObject().AddComponent<Text>();
+            text.transform.parent = canvasObj.transform;
             text.font = Resources.GetBuiltinResource<Font>("Arial.ttf");
-            text.text = "Synthium";
+            text.text = "kante menu v0.1\n";
             text.fontSize = 1;
             text.color = Color.white;
             text.supportRichText = true;
             text.resizeTextForBestFit = true;
             text.resizeTextMinSize = 0;
             var rect = text.GetComponent<RectTransform>();
-            rect.localPosition = Vector3.zero;
             rect.sizeDelta = new Vector2(0.6f, 0.03f);
-            rect.SetPositionAndRotation(new Vector3(0.06f, 0f, 0.165f), Quaternion.Euler(180f, 90f, 90f));
-            Color start = PhysicalMenu.GetHex("#FF9AE3");
-            Color end = PhysicalMenu.GetHex("#A1C4FD");
-            Synthium.Backend.MenuComponents.Gradient.AddGradientComponent(menu, start, end, 0.5f);
-            Button[] activeButtons = ButtonList.Buttons[categoryIndex].Skip(pageIndex * 7).Take(8).ToArray();
+            rect.localPosition = new Vector3(0.008f, -0.253f, 0.13f);
+            rect.localRotation = Quaternion.Euler(180f, 90f, 90f);
+            Material mat = new Material(Shader.Find("Universal Render Pipeline/Lit"));
+            mat.color = new Color(0.05f, 0.05f, 0.05f);
+
+            menu.GetComponent<MeshRenderer>().material = mat;
+            menu.GetComponent<MeshRenderer>().material.color = Color.black;
+
+
+            /*var start = GetHex("#000000");
+            var end = GetHex("#0d0c0c");
+            Backend.MenuComponents.Gradient.AddGradientComponent(menu, start, end, 1f);*/
+            var activeButtons = ButtonList.Buttons[categoryIndex].Skip(pageIndex * 7).Take(7).ToArray();
             for (int i = 0; i < activeButtons.Length; i++)
-            {
                 CreateButtons(activeButtons[i], i * 0.1f);
-            }
+            CreatePageButtons();
+            CreateClicker();
         }
 
-        // took this off of iiDk template mainly, so credits to iiDk.
         public static void CreateButtons(Button btn, float offset)
         {
-            GameObject button = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            var button = GameObject.CreatePrimitive(PrimitiveType.Cube);
             UnityEngine.Object.Destroy(button.GetComponent<Rigidbody>());
-            UnityEngine.Object.Destroy(button.GetComponent<BoxCollider>());
+            button.name = "SynthiumButton";
+            var collider = button.GetComponent<Collider>() as BoxCollider ?? button.AddComponent<BoxCollider>();
+            collider.isTrigger = true;
             button.transform.parent = baseMenu.transform;
-            button.transform.rotation = Quaternion.identity;
-            button.transform.localScale = new Vector3(0.09f, 0.9f, 0.08f);
-            button.transform.localPosition = new Vector3(0.56f, 0f, 0.28f - offset);
-            button.GetComponent<BoxCollider>().isTrigger = true;
-            button.AddComponent<ButtonCollider>().text = btn.buttonText;
+            button.transform.localPosition = new Vector3(0.1f, 0f, 0.28f - offset);
+            button.transform.localRotation = Quaternion.identity;
+            button.transform.localScale = new Vector3(0.0001f, 0.98f, 0.093f);
+            Material mat = new Material(Shader.Find("Universal Render Pipeline/Lit"));
+            mat.color = new Color(0.05f, 0.05f, 0.05f);
+            mat.SetFloat("_Metallic", 0.6f);
+            mat.SetFloat("_Smoothness", 0.1f);
+            button.GetComponent<MeshRenderer>().material = mat;
             button.GetComponent<MeshRenderer>().material.color = Color.black;
-            Text text = new GameObject
-            {
-                transform =
-                {
-                    parent = canvasObj.transform
-                }
-            }.AddComponent<Text>();
+            var trigger = button.AddComponent<ButtonCollider>();
+            trigger.text = btn.buttonText;
+            var text = new GameObject().AddComponent<Text>();
+            text.transform.parent = canvasObj.transform;
             text.font = Resources.GetBuiltinResource<Font>("Arial.ttf");
             text.text = btn.buttonText;
-            if (btn.enabled)
-            {
-                text.color = Color.green;
-            }
-            else
-            {
-                text.color = Color.white;
-            }
-
+            text.color = btn.enabled ? GetHex("#181a1c") : Color.white;
             text.alignment = TextAnchor.MiddleCenter;
-            text.fontStyle = FontStyle.Italic;
             text.resizeTextForBestFit = true;
             text.resizeTextMinSize = 0;
-            RectTransform component = text.GetComponent<RectTransform>();
-            component.localPosition = Vector3.zero;
-            component.sizeDelta = new Vector2(.2f, .03f);
-            component.localPosition = new Vector3(.064f, 0, .111f - offset / 2.6f);
-            component.rotation = Quaternion.Euler(new Vector3(180f, 90f, 90f));
+            var rect = text.GetComponent<RectTransform>();
+            rect.sizeDelta = new Vector2(0.15f, 0.03f);
+            rect.localPosition = new Vector3(0.011f, -0.0077f, 0.1098f - offset / 2.6f);
+            rect.localRotation = Quaternion.Euler(180f, 90f, 90f);
         }
 
-        public static Button GetButton(string buttonText)
+        public static void CreatePageButtons()
         {
-            return ButtonList.Buttons.SelectMany(buttons => buttons)
-                .FirstOrDefault(button => button.buttonText == buttonText);
+            var button = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            UnityEngine.Object.Destroy(button.GetComponent<Rigidbody>());
+            button.name = "SynthiumButton";
+            var collider = button.GetComponent<Collider>() as BoxCollider ?? button.AddComponent<BoxCollider>();
+            collider.isTrigger = true;
+            button.transform.parent = baseMenu.transform;
+            button.transform.localPosition = new Vector3(0.0008f, 0.4f, -0.38f);
+            button.transform.localRotation = Quaternion.identity;
+            button.transform.localScale = new Vector3(0.001f, 0.27f, 0.14f);
+            var trigger = button.AddComponent<ButtonCollider>();
+            trigger.text = "prev";
+            var button2 = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            UnityEngine.Object.Destroy(button2.GetComponent<Rigidbody>());
+            button2.name = "SynthiumButton";
+            var collider2 = button2.GetComponent<Collider>() as BoxCollider ?? button2.AddComponent<BoxCollider>();
+            collider2.isTrigger = true;
+            button2.transform.parent = baseMenu.transform;
+            button2.transform.localPosition = new Vector3(0.0008f, -0.38f, -0.38f);
+            button2.transform.localRotation = Quaternion.identity;
+            button2.transform.localScale = new Vector3(0.001f, 0.27f, 0.14f);
+            button.GetComponent<MeshRenderer>().enabled = false;
+            button2.GetComponent<MeshRenderer>().enabled = false;
+
+            var trigger2 = button2.AddComponent<ButtonCollider>();
+            trigger2.text = "next";
+        }
+
+        public static Button GetButton(string text)
+        {
+            foreach (var btnArray in ButtonList.Buttons)
+            foreach (var btn in btnArray)
+                if (btn.buttonText == text)
+                    return btn;
+            return null;
+        }
+
+        public static void SpawnItem()
+        {
+            
+            /*var view = (PhotonView)Traverse.Create(GameEntityManager.instance).Field("punView").GetValue()
+            GameEntityManager.instance.guard.RequestOwnershipImmediatelyWithGuaranteedAuthority();
+            GameEntityManager.instance.guard.photonView.RPC("OwnershipRequested", 0, new object[]
+            {
+                GameEntityManager.instance.guard.ownershipRequestNonce + "1"
+            });
+            view.RPC("CreateItemRPC", RpcTarget.All, new object[]
+            {
+                this.netIdsForCreate.ToArray(),
+                this.zoneIdsForCreate.ToArray(),
+                this.entityTypeIdsForCreate.ToArray(),
+                this.packedPositionsForCreate.ToArray(),
+                this.packedRotationsForCreate.ToArray(),
+                this.createDataForCreate.ToArray()
+            });*/
+        }
+        
+        public static void GhostAllV2()
+        {
+            foreach (Player p in PhotonNetwork.PlayerListOthers)
+            {
+                var view = (PhotonView)Traverse.Create(GhostReactorManager.instance).Field("punView").GetValue();
+                GameEntityManager.instance.guard.RequestOwnershipImmediatelyWithGuaranteedAuthority();
+                GameEntityManager.instance.guard.photonView.RPC("OwnershipRequested", 0, new object[]
+                {
+                    GameEntityManager.instance.guard.ownershipRequestNonce + "1"
+                });
+                view.RPC("ReportLocalPlayerHitRPC", RpcTarget.All, Array.Empty<object>());
+                view.RPC("ApplyPlayerRevivedRPC", RpcTarget.All, new object[]
+                {
+                    1,
+                    PhotonNetwork.LocalPlayer.ActorNumber
+                });
+            }
+        }
+
+        public static void GhostAll()
+        {
+            foreach (Player p in PhotonNetwork.PlayerListOthers)
+            {
+                var view = (PhotonView)Traverse.Create(GhostReactorManager.instance).Field("punView").GetValue();
+                GameEntityManager.instance.guard.RequestOwnershipImmediatelyWithGuaranteedAuthority();
+                GameEntityManager.instance.guard.photonView.RPC("OwnershipRequested", 0, new object[]
+                {
+                    GameEntityManager.instance.guard.ownershipRequestNonce + "1"
+                });
+                view.RPC("ReportLocalPlayerHitRPC", RpcTarget.All, Array.Empty<object>());
+                view.RPC("ApplyPlayerRevivedRPC", RpcTarget.All, new object[]
+                {
+                    1,
+                    PhotonNetwork.LocalPlayer.ActorNumber
+                });
+            }
+        }
+
+        public static void KillAll()
+        {
+            var view = (PhotonView)Traverse.Create(GhostReactorManager.instance).Field("punView").GetValue();
+            GameEntityManager.instance.guard.RequestOwnershipImmediatelyWithGuaranteedAuthority();
+            GameEntityManager.instance.guard.photonView.RPC("OwnershipRequested", 0, new object[]
+            {
+                GameEntityManager.instance.guard.ownershipRequestNonce + "1"
+            });
+            view.RPC("PlayerStateChangeRPC", RpcTarget.All, new object[]
+            {
+                PhotonNetwork.LocalPlayer,
+                1
+            });
+            view.RPC("ApplyPlayerRevivedRPC", RpcTarget.All, new object[]
+            {
+                GameObject.FindObjectOfType<GRReviveStation>().Index,
+                PhotonNetwork.LocalPlayer.ActorNumber
+            });
         }
 
         public static void DestroyMenu(bool redraw)
         {
-            if (menu || baseMenu)
-            {
-                UnityEngine.Object.Destroy(menu);
-                UnityEngine.Object.Destroy(baseMenu);
-                menu = baseMenu = null;
-            }
-
-            if (redraw)
-            {
-                Draw();
-            }
+            UnityEngine.Object.Destroy(menu);
+            UnityEngine.Object.Destroy(baseMenu);
+            UnityEngine.Object.Destroy(clicker);
+            menu = baseMenu = null;
+            if (redraw) Draw();
         }
 
         public static void ToggleButton(string btnText)
         {
-            int pageLength = ButtonList.Buttons.Length;
+            var pageLength = ButtonList.Buttons.Length;
             if (btnText == "next")
             {
                 pageIndex = (pageIndex + 1) % pageLength;
+                DestroyMenu(true);
                 return;
             }
 
             if (btnText == "prev")
             {
                 pageIndex = (pageIndex - 1 + pageLength) % pageLength;
+                DestroyMenu(true);
                 return;
             }
 
             var button = GetButton(btnText);
             if (button == null) return;
+
             if (button.toggle)
             {
                 button.enabled = !button.enabled;

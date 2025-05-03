@@ -1,4 +1,4 @@
-﻿using System;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 namespace Synthium.WristMenu
@@ -6,16 +6,17 @@ namespace Synthium.WristMenu
     public class ButtonCollider : MonoBehaviour
     {
         public string text;
-        public float delay;
+        public static float delay;
 
         public void OnTriggerEnter(Collider collider)
         {
-            if (collider == PhysicalMenu.clickerCollider && Time.time > delay)
+            if (collider == PhysicalMenu.clickerCollider && Time.time >= delay)
             {
-                PhysicalMenu.ToggleButton(text);
+                delay = Time.time + 0.3f;
                 GorillaTagger.Instance.offlineVRRig.PlayHandTapLocal(138, true, 0.25f);
-                delay = Time.time + 0.23f;
+                PhysicalMenu.ToggleButton(text);
             }
         }
     }
+
 }

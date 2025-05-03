@@ -13,7 +13,7 @@ namespace Synthium.Backend.Patches
         {
             new Harmony("synthium").PatchAll();
             GameObject loader = new GameObject("SynthiumObj");
-            loader.AddComponent<WristMenu.PhysicalMenu>();
+            loader.AddComponent<Synthium.WristMenu.PhysicalMenu>();
             DontDestroyOnLoad(loader);
         }
     }

@@ -39,7 +39,7 @@
     <Compile Include="Backend\MenuComponents\Button.cs" />
     <Compile Include="Backend\MenuComponents\ColorLerp.cs" />
     <Compile Include="Backend\MenuComponents\Gradient.cs" />
-    <Compile Include="Backend\MenuComponents\Synthiumlib.cs" />
+    <Compile Include="Backend\MenuComponents\GunLib.cs" />
     <Compile Include="Backend\Patches\FingerPatch.cs" />
     <Compile Include="Backend\Patches\PlayfabPatch.cs" />
     <Compile Include="Backend\Patches\Plugin.cs" />
@@ -51,7 +51,10 @@
     <Compile Include="WristMenu\ButtonCollider.cs" />
     <Compile Include="WristMenu\ButtonList.cs" />
     <Compile Include="WristMenu\Editor.cs" />
-    <Compile Include="WristMenu\Modules.cs" />
+    <Compile Include="WristMenu\Mods\Menu.cs" />
+    <Compile Include="WristMenu\Mods\Movement.cs" />
+    <Compile Include="WristMenu\Mods\Player.cs" />
+    <Compile Include="WristMenu\Mods\Room.cs" />
     <Compile Include="WristMenu\PhysicalMenu.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -240,15 +243,6 @@
     </Reference>
     <Reference Include="NavMeshComponents">
       <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Gorilla Tag\Gorilla Tag_Data\Managed\NavMeshComponents.dll</HintPath>
-    </Reference>
-    <Reference Include="Newtonsoft.Json">
-      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Gorilla Tag\Gorilla Tag_Data\Managed\Newtonsoft.Json.dll</HintPath>
-    </Reference>
-    <Reference Include="Newtonsoft.Json.UnityConverters">
-      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Gorilla Tag\Gorilla Tag_Data\Managed\Newtonsoft.Json.UnityConverters.dll</HintPath>
-    </Reference>
-    <Reference Include="Newtonsoft.Json.UnityConverters.Addressables">
-      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Gorilla Tag\Gorilla Tag_Data\Managed\Newtonsoft.Json.UnityConverters.Addressables.dll</HintPath>
     </Reference>
     <Reference Include="nexus.nexussdk.Runtime">
       <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Gorilla Tag\Gorilla Tag_Data\Managed\nexus.nexussdk.Runtime.dll</HintPath>
