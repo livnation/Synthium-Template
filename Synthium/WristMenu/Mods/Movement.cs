@@ -39,7 +39,7 @@ namespace Synthium.WristMenu.Mods
         {
             if (ControllerInputPoller.instance.rightControllerPrimaryButton)
             {
-                GorillaLocomotion.GTPlayer.Instance.transform.position += GTPlayer.Instance.headCollider.transform.forward * 2f;
+                GorillaLocomotion.GTPlayer.Instance.transform.position += GTPlayer.Instance.headCollider.transform.forward * 0.3f;
             }
         }
     }

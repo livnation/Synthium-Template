@@ -10,40 +10,20 @@ namespace Synthium.WristMenu
         {
             new Button[]
             {
-                new Button { buttonText = "Room", toggle = false, method = () => { Menu.SwitchIndex(1); }},
-                new Button { buttonText = "Settings", toggle = true, enableMethod = () => { Menu.SwitchIndex(2); }},
-                new Button { buttonText = "Player", toggle = true, enableMethod = () => { Menu.SwitchIndex(3); }},
+                new Button { buttonText = "Disconnect", toggle = false, method = () => { PhotonNetwork.Disconnect(); }},
+                new Button { buttonText = "Disable Fingers", toggle = false, method = () => { Menu.ToggleFingers(); }},
                 new Button { buttonText = "Air Jump", toggle = true, enableMethod = () => { Movement.AirJump(); }},
-                new Button { buttonText = "Gun Lib", toggle = true, enableMethod = () => { Player.GunLib(); }},
-                new Button { buttonText = "Flu", toggle = true, enableMethod = () => { Player.GunLib(); }},
-                new Button { buttonText = "dfd", toggle = true, enableMethod = () => { Player.GunLib(); }},
-            },
-            new Button[]
-            {
-                new Button { buttonText = "Return To Home", toggle = false, method = () => { Menu.SwitchIndex(0); }},
-                new Button { buttonText = "dsad", toggle = true, enableMethod = () => { Player.GunLib(); }},
-                new Button { buttonText = "dsad", toggle = true, enableMethod = () => { Player.GunLib(); }},
-                new Button { buttonText = "dsad", toggle = true, enableMethod = () => { Player.GunLib(); }},
-                new Button { buttonText = "dsad", toggle = true, enableMethod = () => { Player.GunLib(); }},
-                new Button { buttonText = "dsad", toggle = true, enableMethod = () => { Player.GunLib(); }},
-            },
-            new Button[]
-            {
-                new Button { buttonText = "Return To Home", toggle = false, method = () => { Menu.SwitchIndex(0); }},
-                new Button { buttonText = "fas", toggle = true, enableMethod = () => { Player.GunLib(); }},
-                new Button { buttonText = "saf", toggle = true, enableMethod = () => { Player.GunLib(); }},
-                new Button { buttonText = "dsaasfasd", toggle = true, enableMethod = () => { Player.GunLib(); }},
-                new Button { buttonText = "safsf", toggle = true, enableMethod = () => { Player.GunLib(); }},
-                new Button { buttonText = "dsaassad", toggle = true, enableMethod = () => { Player.GunLib(); }},
-            },
-            new Button[]
-            {
-                new Button { buttonText = "Return To Home", toggle = false, method = () => { Menu.SwitchIndex(0); }},
-                new Button { buttonText = "dont make me pull the toys out", toggle = true, enableMethod = () => { Player.GunLib(); }},
-                new Button { buttonText = "dsad", toggle = true, enableMethod = () => { Player.GunLib(); }},
-                new Button { buttonText = "dsad", toggle = true, enableMethod = () => { Player.GunLib(); }},
-                new Button { buttonText = "dsad", toggle = true, enableMethod = () => { Player.GunLib(); }},
-                new Button { buttonText = "dsad", toggle = true, enableMethod = () => { Player.GunLib(); }},
+                new Button { buttonText = "Fly", toggle = true, enableMethod = () => { Movement.Fly(); }},
+                new Button { buttonText = "Chams", toggle = true, enableMethod = () => { Player.Chams(); }, disable = () => { Player.DisableChams(); }},
+                new Button { buttonText = "Placeholder1", toggle = true, enableMethod = () => { Player.GunLib(); }},
+                new Button { buttonText = "Placeholder2", toggle = true, enableMethod = () => { Player.GunLib(); }},
+                new Button { buttonText = "Placeholder3", toggle = true, enableMethod = () => { Player.GunLib(); }},
+                new Button { buttonText = "Placeholder4", toggle = true, enableMethod = () => { Player.GunLib(); }},
+                new Button { buttonText = "Placeholder5", toggle = true, enableMethod = () => { Player.GunLib(); }},
+                new Button { buttonText = "Placeholder6", toggle = true, enableMethod = () => { Player.GunLib(); }},
+                new Button { buttonText = "Placeholder7", toggle = true, enableMethod = () => { Player.GunLib(); }},
+                new Button { buttonText = "Placeholder8", toggle = true, enableMethod = () => { Player.GunLib(); }},
+                new Button { buttonText = "Placeholder9", toggle = true, enableMethod = () => { Player.GunLib(); }},
             },
         };
     }

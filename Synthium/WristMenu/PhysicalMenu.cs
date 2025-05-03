@@ -122,11 +122,8 @@ namespace Synthium.WristMenu
             rect.localRotation = Quaternion.Euler(180f, 90f, 90f);
             Material mat = new Material(Shader.Find("Universal Render Pipeline/Lit"));
             mat.color = new Color(0.05f, 0.05f, 0.05f);
-
             menu.GetComponent<MeshRenderer>().material = mat;
             menu.GetComponent<MeshRenderer>().material.color = Color.black;
-
-
             /*var start = GetHex("#000000");
             var end = GetHex("#0d0c0c");
             Backend.MenuComponents.Gradient.AddGradientComponent(menu, start, end, 1f);*/
